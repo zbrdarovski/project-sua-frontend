@@ -1,3 +1,21 @@
+# Online Shoe Shop App Frontend
+
+## How to buld and run:
+
+## Debug:
+
+### npm install
+### npm run build:debug
+### npm run start:debug
+
+## Release:
+
+### npm  install
+### npm run build
+### npm run serve
+
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
 Below you will find some information on how to perform common tasks.<br>
