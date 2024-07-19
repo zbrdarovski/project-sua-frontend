@@ -5,13 +5,6 @@
     grid-template-columns: 1fr; /* Single column layout */
     gap: 20px; /* Gap between grid items */
 }
-
-    .Rabbit button {
-        margin-left: 300px;
-        margin: 10px;
-        width: 100px;
-    }
-
     .Rabbit div {
         margin-top: 20px;
     }

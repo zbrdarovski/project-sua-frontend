@@ -1,4 +1,5 @@
 import './StatsBrdarovski.css';
+import Dashboard from './Dashboard';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -7,18 +8,26 @@ const StatsBrdarovski = () => {
     const [mostFrequentEndpoint, setMostFrequentEndpoint] = useState("");
     const [callsPerEndpoint, setCallsPerEndpoint] = useState({});
 
-    useEffect(() => {
-        fetchLastCalledEndpoint();
-        fetchMostFrequentlyCalledEndpoint();
-        fetchCallsPerEndpoint();
-    }, []);
+    const baseUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:1187' 
+        : 'http://statsbrdarovski';
 
-    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1187' : 'http://statsbrdarovski';
+    useEffect(() => {
+        const fetchData = async () => {
+            await Promise.all([
+                fetchLastCalledEndpoint(),
+                fetchMostFrequentlyCalledEndpoint(),
+                fetchCallsPerEndpoint()
+            ]);
+        };
+
+        fetchData();
+    }, []);
 
     const fetchLastCalledEndpoint = async () => {
         try {
-            const response = await axios.get(`${baseUrl}/StatsBrdarovski/GetLastEndpoint`);
-            setLastCalledEndpoint(response.data);
+            const { data } = await axios.get(`${baseUrl}/StatsBrdarovski/GetLastEndpoint`);
+            setLastCalledEndpoint(data);
         } catch (error) {
             console.error('Error fetching last called endpoint:', error);
         }
@@ -26,8 +35,8 @@ const StatsBrdarovski = () => {
 
     const fetchMostFrequentlyCalledEndpoint = async () => {
         try {
-            const response = await axios.get(`${baseUrl}/StatsBrdarovski/GetMostCalledEndpoint`);
-            setMostFrequentEndpoint(response.data);
+            const { data } = await axios.get(`${baseUrl}/StatsBrdarovski/GetMostCalledEndpoint`);
+            setMostFrequentEndpoint(data);
         } catch (error) {
             console.error('Error fetching most frequently called endpoint:', error);
         }
@@ -35,8 +44,8 @@ const StatsBrdarovski = () => {
 
     const fetchCallsPerEndpoint = async () => {
         try {
-            const response = await axios.get(`${baseUrl}/StatsBrdarovski/GetCallsPerEndpoint`);
-            setCallsPerEndpoint(response.data);
+            const { data } = await axios.get(`${baseUrl}/StatsBrdarovski/GetCallsPerEndpoint`);
+            setCallsPerEndpoint(data);
         } catch (error) {
             console.error('Error fetching calls per endpoint:', error);
         }
@@ -50,20 +59,25 @@ const StatsBrdarovski = () => {
         }
     };
 
+    const refreshStatistics = () => {
+        fetchLastCalledEndpoint();
+        fetchMostFrequentlyCalledEndpoint();
+        fetchCallsPerEndpoint();
+    };
+
     return (
-        <div className="brdarovskistats">
+        <div className="brdarovski">
+            <Dashboard />
             <p>Last Called Endpoint: {lastCalledEndpoint}</p>
             <p>Most Frequently Called Endpoint: {mostFrequentEndpoint}</p>
             <p>Calls Per Endpoint:</p>
             {Object.entries(callsPerEndpoint).map(([endpoint, count]) => (
                 <p key={endpoint}>{endpoint}: {count}</p>
             ))}
-            <button onClick={() => {
-                fetchLastCalledEndpoint();
-                fetchMostFrequentlyCalledEndpoint();
-                fetchCallsPerEndpoint();
-            }}>Refresh Statistics</button>
-            <button onClick={() => updateData("/CommentsRatings/comments")}>Update Data</button>
+            <div className="buttons">
+                <button onClick={refreshStatistics}>Refresh Statistics</button>
+                <button onClick={() => updateData("/CommentsRatings/comments")}>Update Data</button>
+            </div>
         </div>
     );
 };
