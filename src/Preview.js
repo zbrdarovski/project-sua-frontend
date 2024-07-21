@@ -5,26 +5,36 @@ import { Link } from 'react-router-dom';
 
 const DeliveryList = () => {
     const [deliveries, setDeliveries] = useState([]);
-
     const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token'); // Ensure you have the token
 
     useEffect(() => {
         const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1182' : 'http://deliveryapi';
 
-        // Fetch data from the API endpoint
-        fetch(`${baseUrl}/api/deliveries/`)
-            .then(response => response.json())
-            .then(data => {
-                // Filter deliveries based on userId
-                const userDeliveries = data.filter(delivery => delivery.userId === userId);
+        // Fetch data from the API endpoint with proper authorization
+        fetch(`${baseUrl}/api/deliveries/`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`, // Include the token in the request headers
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Filter deliveries based on userId
+            const userDeliveries = data.filter(delivery => delivery.userId === userId);
 
-                // Update the state with the filtered data
-                setDeliveries(userDeliveries);
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
-            });
-    }, [userId]); // Dependency array ensures the effect runs when userId changes
+            // Update the state with the filtered data
+            setDeliveries(userDeliveries);
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+    }, [userId, token]); // Dependency array ensures the effect runs when userId or token changes
 
     // Function to format the delivery time
     const formatDeliveryTime = (timeString) => {

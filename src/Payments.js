@@ -7,22 +7,25 @@ const PaymentHistory = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token'); // Assuming the token is stored in localStorage
 
     useEffect(() => {
         const fetchPayments = async () => {
             try {
-                
-            
-            const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1183' : 'http://cartpaymentapi';
+                const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1183' : 'http://cartpaymentapi';
 
                 const response = await fetch(`${baseUrl}/CartPayment/payments/${userId}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`, // Include the token in the request headers
                     },
                 });
 
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Unauthorized: Please log in again.');
+                    }
                     throw new Error('Failed to fetch payments');
                 }
 
@@ -35,10 +38,13 @@ const PaymentHistory = () => {
             }
         };
 
-        if (userId) {
+        if (userId && token) {
             fetchPayments();
+        } else {
+            setIsLoading(false);
+            setError('User is not logged in or missing token');
         }
-    }, [userId]);
+    }, [userId, token]);
 
     if (isLoading) {
         return <div>Loading...</div>;

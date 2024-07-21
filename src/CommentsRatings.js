@@ -1,7 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
-import './Shop.css';
+import './CommentsRatings.css';
 import Dashboard from './Dashboard';
-import { useNavigate } from 'react-router-dom';
 
 const CommentsRatings = () => {
     const [errorMessage, setErrorMessage] = useState('');
@@ -9,8 +8,8 @@ const CommentsRatings = () => {
     const [products, setProducts] = useState([]);
     const [comments, setComments] = useState({});
     const [ratings, setRatings] = useState({});
-    const [newComment, setNewComment] = useState('');
-    const [newRating, setNewRating] = useState(1); // Default rating value
+    const [newComment, setNewComment] = useState({});
+    const [newRating, setNewRating] = useState({});
     const [highestCommentId, setHighestCommentId] = useState(0);
     const [highestRatingId, setHighestRatingId] = useState(0);
 
@@ -18,62 +17,88 @@ const CommentsRatings = () => {
         const fetchAllShoes = async () => {
             try {
                 const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1184' : 'http://inventoryapi';
-
                 const allShoesResponse = await fetch(`${baseUrl}/Inventory`);
+                
                 if (!allShoesResponse.ok) {
-                    console.error('Failed to fetch all shoes:', allShoesResponse.statusText);
                     const errorText = await allShoesResponse.text();
-                    console.error('Response text:', errorText);
+                    console.error('Failed to fetch all shoes:', errorText);
                     setErrorMessage('Failed to fetch shoes. See console for details.');
                     return;
                 }
+                
                 const allShoesData = await allShoesResponse.json();
+                const filteredShoes = allShoesData.filter((shoe) => shoe.id >= 3);
+                setProducts(filteredShoes);
 
-                if (allShoesData.length > 0) {
-                    const filteredShoes = allShoesData.filter((shoe) => shoe.id >= 3);
-                    setProducts(filteredShoes);
+                const commentsData = {};
+                const ratingsData = {};
+                let highestComment = 0;
+                let highestRating = 0;
 
-                    const commentsData = {};
-                    const ratingsData = {};
-                    let highestComment = 0;
-                    let highestRating = 0;
+                for (const shoe of filteredShoes) {
+                    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://commentsratings';
+                    
+                    const commentsResponse = await fetch(`${baseUrl}/CommentsRatings/comments/${shoe.id}`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
 
-                    for (const shoe of filteredShoes) {
-                        const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://commentsratings';
-                        
-                        const commentsResponse = await fetch(`${baseUrl}/CommentsRatings/comments/${shoe.id}`);
-                        const commentsJson = await commentsResponse.json();
-                        commentsData[shoe.id] = commentsJson;
+                    if (!commentsResponse.ok) {
+                        console.error(`Failed to fetch comments for shoe ${shoe.id}:`, await commentsResponse.text());
+                        continue;
+                    }
+                    
+                    const commentsJson = await commentsResponse.json();
+                    commentsData[shoe.id] = commentsJson;
 
-                        commentsJson.forEach(comment => {
-                            const commentId = parseInt(comment.id, 10);
-                            highestComment = Math.max(highestComment, commentId);
-                        });
+                    commentsJson.forEach(comment => {
+                        const commentId = parseInt(comment.id, 10);
+                        highestComment = Math.max(highestComment, commentId);
+                    });
 
-                        const ratingsResponse = await fetch(`${baseUrl}/CommentsRatings/ratings/${shoe.id}`);
-                        const ratingsJson = await ratingsResponse.json();
-                        ratingsData[shoe.id] = ratingsJson;
+                    const ratingsResponse = await fetch(`${baseUrl}/CommentsRatings/ratings/${shoe.id}`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
 
-                        ratingsJson.forEach(rating => {
-                            const ratingId = parseInt(rating.id, 10);
-                            highestRating = Math.max(highestRating, ratingId);
-                        });
+                    if (!ratingsResponse.ok) {
+                        console.error(`Failed to fetch ratings for shoe ${shoe.id}:`, await ratingsResponse.text());
+                        continue;
                     }
 
-                    setComments(commentsData);
-                    setRatings(ratingsData);
+                    const ratingsJson = await ratingsResponse.json();
+                    ratingsData[shoe.id] = ratingsJson;
 
-                    setHighestCommentId(highestComment);
-                    setHighestRatingId(highestRating);
-
-                    const quantities = {};
-                    filteredShoes.forEach((shoe) => {
-                        quantities[shoe.id] = shoe.quantity;
+                    ratingsJson.forEach(rating => {
+                        const ratingId = parseInt(rating.id, 10);
+                        highestRating = Math.max(highestRating, ratingId);
                     });
-                    setAvailableQuantities(quantities);
                 }
+
+                setComments(commentsData);
+                setRatings(ratingsData);
+                setHighestCommentId(highestComment);
+                setHighestRatingId(highestRating);
+
+                const quantities = {};
+                filteredShoes.forEach((shoe) => {
+                    quantities[shoe.id] = shoe.quantity;
+                });
+                setAvailableQuantities(quantities);
+                
+                // Initialize newComment and newRating state objects
+                const initialNewComment = {};
+                const initialNewRating = {};
+                filteredShoes.forEach((shoe) => {
+                    initialNewComment[shoe.id] = '';
+                    initialNewRating[shoe.id] = 1;
+                });
+                setNewComment(initialNewComment);
+                setNewRating(initialNewRating);
             } catch (error) {
-                console.error('Failed to fetch shoes:', error.message);
+                console.error('Error fetching all shoes:', error);
                 setErrorMessage('Failed to fetch shoes. See console for details.');
             }
         };
@@ -82,12 +107,14 @@ const CommentsRatings = () => {
     }, []);
 
     const handleCommentSubmit = async (productId) => {
+        if (newComment[productId] === '') return; // Prevent empty comment submissions
+        
         try {
             const requestBody = JSON.stringify({
                 id: (highestCommentId + 1).toString(),
                 itemId: productId,
                 userId: localStorage.getItem('userId'),
-                content: newComment,
+                content: newComment[productId],
                 timestamp: new Date().toISOString(),
             });
 
@@ -97,23 +124,26 @@ const CommentsRatings = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
                 body: requestBody,
             });
 
-            console.log('Request Body:', requestBody);
-
             if (response.ok) {
-                setNewComment('');
+                setNewComment((prev) => ({ ...prev, [productId]: '' }));
                 setHighestCommentId(highestCommentId + 1);
-                const commentsResponse = await fetch(`${baseUrl}/CommentsRatings/comments/${productId}`);
+                const commentsResponse = await fetch(`${baseUrl}/CommentsRatings/comments/${productId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
                 const commentsJson = await commentsResponse.json();
                 setComments((prevComments) => ({ ...prevComments, [productId]: commentsJson }));
             } else {
                 console.error('Failed to submit comment:', response.statusText);
             }
         } catch (error) {
-            console.error('Failed to submit comment:', error.message);
+            console.error('Error submitting comment:', error);
         }
     };
 
@@ -123,17 +153,24 @@ const CommentsRatings = () => {
 
             const response = await fetch(`${baseUrl}/CommentsRatings/comments/${commentId}`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
 
             if (response.ok) {
-                const commentsResponse = await fetch(`${baseUrl}/CommentsRatings/comments/${productId}`);
+                const commentsResponse = await fetch(`${baseUrl}/CommentsRatings/comments/${productId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
                 const commentsJson = await commentsResponse.json();
                 setComments((prevComments) => ({ ...prevComments, [productId]: commentsJson }));
             } else {
                 console.error('Failed to delete comment:', response.statusText);
             }
         } catch (error) {
-            console.error('Failed to delete comment:', error.message);
+            console.error('Error deleting comment:', error);
         }
     };
 
@@ -145,26 +182,31 @@ const CommentsRatings = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
                 body: JSON.stringify({
                     id: (highestRatingId + 1).toString(),
                     itemId: productId,
                     userId: localStorage.getItem('userId'),
-                    value: newRating,
+                    value: newRating[productId],
                     timestamp: new Date().toISOString(),
                 }),
             });
 
             if (response.ok) {
-                const ratingsResponse = await fetch(`${baseUrl}/CommentsRatings/ratings/${productId}`);
                 setHighestRatingId(highestRatingId + 1);
+                const ratingsResponse = await fetch(`${baseUrl}/CommentsRatings/ratings/${productId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
                 const ratingsJson = await ratingsResponse.json();
                 setRatings((prevRatings) => ({ ...prevRatings, [productId]: ratingsJson }));
             } else {
                 console.error('Failed to submit rating:', response.statusText);
             }
         } catch (error) {
-            console.error('Failed to submit rating:', error.message);
+            console.error('Error submitting rating:', error);
         }
     };
 
@@ -174,17 +216,24 @@ const CommentsRatings = () => {
 
             const response = await fetch(`${baseUrl}/CommentsRatings/ratings/${ratingId}`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
 
             if (response.ok) {
-                const ratingsResponse = await fetch(`${baseUrl}/CommentsRatings/ratings/${productId}`);
+                const ratingsResponse = await fetch(`${baseUrl}/CommentsRatings/ratings/${productId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
                 const ratingsJson = await ratingsResponse.json();
                 setRatings((prevRatings) => ({ ...prevRatings, [productId]: ratingsJson }));
             } else {
                 console.error('Failed to delete rating:', response.statusText);
             }
         } catch (error) {
-            console.error('Failed to delete rating:', error.message);
+            console.error('Error deleting rating:', error);
         }
     };
 
@@ -193,6 +242,14 @@ const CommentsRatings = () => {
         const totalRating = ratingsArray.reduce((sum, rating) => sum + rating.value, 0);
         const averageRating = totalRating / ratingsArray.length || 0;
         return averageRating.toFixed(2);
+    };
+
+    const hasUserCommented = (productId) => {
+        return comments[productId]?.some(comment => comment.userId === localStorage.getItem('userId'));
+    };
+
+    const hasUserRated = (productId) => {
+        return ratings[productId]?.some(rating => rating.userId === localStorage.getItem('userId'));
     };
 
     return (
@@ -209,31 +266,54 @@ const CommentsRatings = () => {
                             <div>
                                 <h3>Comments:</h3>
                                 {comments[product.id]?.map((comment) => (
-                                    <div key={comment.id}>
+                                    <div key={comment.id} className="comment">
                                         <p>{comment.content}</p>
-                                        <button onClick={() => handleCommentDelete(product.id, comment.id)}>Delete</button>
+                                        {hasUserCommented(product.id) && (
+                                            <button 
+                                                onClick={() => handleCommentDelete(product.id, comment.id)}
+                                                disabled={!comments[product.id]?.length}
+                                            >
+                                                Delete Comment
+                                            </button>
+                                        )}
                                     </div>
                                 ))}
                                 <textarea
                                     placeholder="Add/Edit Comment"
-                                    value={newComment}
-                                    onChange={(e) => setNewComment(e.target.value)}
+                                    value={newComment[product.id] || ''}
+                                    onChange={(e) => setNewComment((prev) => ({ ...prev, [product.id]: e.target.value }))}
                                 />
-                                <button onClick={() => handleCommentSubmit(product.id)}>Comment</button>
+                                <button 
+                                    onClick={() => handleCommentSubmit(product.id)}
+                                    disabled={hasUserCommented(product.id)}
+                                >
+                                    Comment
+                                </button>
                             </div>
 
                             <div>
                                 <h3>Rating: {calculateAverageRating(product.id)}</h3>
                                 <select
-                                    value={newRating}
-                                    onChange={(e) => setNewRating(Number(e.target.value))}
+                                    value={newRating[product.id] || 1}
+                                    onChange={(e) => setNewRating((prev) => ({ ...prev, [product.id]: Number(e.target.value) }))}
                                 >
                                     {[1, 2, 3, 4, 5].map((value) => (
                                         <option key={value} value={value}>{value}</option>
                                     ))}
                                 </select>
-                                <button onClick={() => handleRatingSubmit(product.id)}>Rate</button>
-                                <button onClick={() => handleRatingDelete(product.id, ratings[product.id]?.[0]?.id)}>Delete Rating</button>
+                                <button 
+                                    onClick={() => handleRatingSubmit(product.id)}
+                                    disabled={hasUserRated(product.id)}
+                                >
+                                    Rate
+                                </button>
+                                {ratings[product.id]?.length > 0 && (
+                                    <button 
+                                        onClick={() => handleRatingDelete(product.id, ratings[product.id][0]?.id)}
+                                    >
+                                        Delete Rating
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>

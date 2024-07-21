@@ -59,14 +59,15 @@ const Delivery = () => {
                 const geoX = Math.random();
                 const geoY = Math.random();
                 const deliveryTime = new Date().toISOString();
-
                 const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1183' : 'http://cartpaymentapi';
-                
+                const token = localStorage.getItem('token');  // Fetch the token from local storage
+    
                 // Create a new payment first
                 const paymentResponse = await fetch(`${baseUrl}/CartPayment/payment/add`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,  // Add Authorization header
                     },
                     body: JSON.stringify({
                         id: (highestDeliveryId + 1).toString(),
@@ -88,12 +89,12 @@ const Delivery = () => {
                         paymentDate: deliveryTime,
                     }),
                 });
-
+    
                 if (!paymentResponse.ok) {
                     console.error('Failed to create payment');
                     return;
                 }
-
+    
                 try {
                     const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1182' : 'http://deliveryapi';
                     
@@ -101,6 +102,7 @@ const Delivery = () => {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,  // Add Authorization header
                         },
                         body: JSON.stringify({
                             id: (highestDeliveryId + 1).toString(),
@@ -112,9 +114,9 @@ const Delivery = () => {
                             geoY,
                         }),
                     });
-
+    
                     const basedUrl = process.env.NODE_ENV === 'development' ? 'http://localhost' : 'http://inventoryapi';
-
+    
                     if (deliveryResponse.ok) {
                         // Update inventory items and navigate accordingly
                         for (const item of cart) {
@@ -122,7 +124,7 @@ const Delivery = () => {
                                 method: 'PUT',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                    'Authorization': `Bearer ${token}`,  // Add Authorization header
                                 },
                                 body: JSON.stringify({
                                     id: item.id,
@@ -137,14 +139,14 @@ const Delivery = () => {
                                     ratings: item.ratings,
                                 }),
                             });
-
+    
                             if (!inventoryUpdateResponse.ok) {
                                 console.error(`Failed to update inventory for item ${item.id}`);
                                 navigate('/shop');
                                 return;
                             }
                         }
-
+    
                         console.log('Order placed successfully');
                         navigate('/preview');
                     } else {

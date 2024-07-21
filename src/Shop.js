@@ -16,9 +16,15 @@ const Shop = () => {
     useEffect(() => {
         const fetchAllShoes = async () => {
             try {
-            const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1184' : 'http://inventoryapi';
+                const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1184' : 'http://inventoryapi';
+                const token = localStorage.getItem('token'); // Retrieve the token from localStorage
 
-                const allShoesResponse = await fetch(`${baseUrl}/Inventory`);
+                const allShoesResponse = await fetch(`${baseUrl}/Inventory`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}` // Include the token in the Authorization header
+                    }
+                });
+
                 if (!allShoesResponse.ok) {
                     console.error('Failed to fetch all shoes:', allShoesResponse.statusText);
                     const errorText = await allShoesResponse.text();
@@ -35,13 +41,21 @@ const Shop = () => {
                     const commentsData = {};
                     const ratingsData = {};
                     for (const shoe of filteredShoes) {
-                        const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://commentsratings';
+                        const commentsUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://commentsratings';
 
-                        const commentsResponse = await fetch(`${baseUrl}/CommentsRatings/comments/${shoe.id}`);
+                        const commentsResponse = await fetch(`${commentsUrl}/CommentsRatings/comments/${shoe.id}`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}` // Include the token in the Authorization header
+                            }
+                        });
                         const commentsJson = await commentsResponse.json();
                         commentsData[shoe.id] = commentsJson;
 
-                        const ratingsResponse = await fetch(`${baseUrl}/CommentsRatings/ratings/${shoe.id}`);
+                        const ratingsResponse = await fetch(`${commentsUrl}/CommentsRatings/ratings/${shoe.id}`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}` // Include the token in the Authorization header
+                            }
+                        });
                         const ratingsJson = await ratingsResponse.json();
                         ratingsData[shoe.id] = ratingsJson;
                     }
