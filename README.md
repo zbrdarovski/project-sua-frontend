@@ -2,17 +2,17 @@
 
 ## Available Scripts:
 
-Debug:
+### Debug:
 
-### `npm install`
-### `npm run build:debug`
-### `npm run start:debug`
+#### `npm install`
+#### `npm run build:debug`
+#### `npm run start:debug`
 
-Release:
+### Release:
 
-### `npm  install`
-### `npm run build`
-### `npm run serve`
+#### `npm  install`
+#### `npm run build`
+#### `npm run serve`
 
 ## About the Project
 

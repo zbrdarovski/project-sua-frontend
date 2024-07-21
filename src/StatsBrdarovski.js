@@ -6,7 +6,7 @@ import axios from 'axios';
 const StatsBrdarovski = () => {
     const [lastCalledEndpoint, setLastCalledEndpoint] = useState("");
     const [mostFrequentEndpoint, setMostFrequentEndpoint] = useState("");
-    const [callsPerEndpoint, setCallsPerEndpoint] = useState({});
+    const [callsPerEndpoint, setCallsPerEndpoint] = useState([]);
 
     const baseUrl = process.env.NODE_ENV === 'development' 
         ? 'http://localhost:1187' 
@@ -27,7 +27,8 @@ const StatsBrdarovski = () => {
     const fetchLastCalledEndpoint = async () => {
         try {
             const { data } = await axios.get(`${baseUrl}/StatsBrdarovski/GetLastEndpoint`);
-            setLastCalledEndpoint(data);
+            console.log('Last Called Endpoint:', data);  // Debugging log
+            setLastCalledEndpoint(data.endpoint);
         } catch (error) {
             console.error('Error fetching last called endpoint:', error);
         }
@@ -36,7 +37,8 @@ const StatsBrdarovski = () => {
     const fetchMostFrequentlyCalledEndpoint = async () => {
         try {
             const { data } = await axios.get(`${baseUrl}/StatsBrdarovski/GetMostCalledEndpoint`);
-            setMostFrequentEndpoint(data);
+            console.log('Most Frequently Called Endpoint:', data);  // Debugging log
+            setMostFrequentEndpoint(data.endpoint);
         } catch (error) {
             console.error('Error fetching most frequently called endpoint:', error);
         }
@@ -45,17 +47,10 @@ const StatsBrdarovski = () => {
     const fetchCallsPerEndpoint = async () => {
         try {
             const { data } = await axios.get(`${baseUrl}/StatsBrdarovski/GetCallsPerEndpoint`);
-            setCallsPerEndpoint(data);
+            console.log('Calls Per Endpoint:', data);  // Debugging log
+            setCallsPerEndpoint(data);  // Directly set the array
         } catch (error) {
             console.error('Error fetching calls per endpoint:', error);
-        }
-    };
-
-    const updateData = async (service) => {
-        try {
-            await axios.post(`${baseUrl}/StatsBrdarovski/PostUpdate`, { klicanaStoritev: service });
-        } catch (error) {
-            console.error('Error updating data:', error);
         }
     };
 
@@ -65,18 +60,24 @@ const StatsBrdarovski = () => {
         fetchCallsPerEndpoint();
     };
 
+    useEffect(() => {
+        console.log('Updated callsPerEndpoint:', callsPerEndpoint);
+    }, [callsPerEndpoint]);
+
     return (
         <div className="brdarovski">
             <Dashboard />
             <p>Last Called Endpoint: {lastCalledEndpoint}</p>
             <p>Most Frequently Called Endpoint: {mostFrequentEndpoint}</p>
-            <p>Calls Per Endpoint:</p>
-            {Object.entries(callsPerEndpoint).map(([endpoint, count]) => (
-                <p key={endpoint}>{endpoint}: {count}</p>
-            ))}
+            <p>
+                Calls Per Endpoint:{" "}
+                {callsPerEndpoint &&
+                    callsPerEndpoint
+                        .map((endpointData) => `${endpointData.endpoint}: ${endpointData.count}`)
+                        .join(", ")}
+            </p>
             <div className="buttons">
                 <button onClick={refreshStatistics}>Refresh Statistics</button>
-                <button onClick={() => updateData("/CommentsRatings/comments")}>Update Data</button>
             </div>
         </div>
     );
