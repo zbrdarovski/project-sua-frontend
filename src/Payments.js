@@ -46,12 +46,8 @@ const PaymentHistory = () => {
         }
     }, [userId, token]);
 
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
-
     if (error) {
-        return <div>Error: {error}</div>;
+        console.log(`Error: ${error}`);
     }
 
     return (
