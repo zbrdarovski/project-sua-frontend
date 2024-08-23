@@ -29,7 +29,7 @@ COPY nginx.conf /etc/nginx/conf.d
 COPY --from=build /app/build /usr/share/nginx/html
 
 # Expose the necessary ports
-EXPOSE 1180
+EXPOSE 11180
 EXPOSE 80
 
 # Env variables
