@@ -10,7 +10,7 @@ const StatsHaramija = () => {
 
     const baseUrl = process.env.NODE_ENV === 'development' 
         ? 'http://localhost:1188' 
-        : 'http://statsharamija';
+        : 'http://studentdocker.informatika.uni-mb.si:11188';
 
     useEffect(() => {
         const fetchData = async () => {

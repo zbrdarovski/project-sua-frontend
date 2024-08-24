@@ -32,7 +32,7 @@ function Login() {
         }
 
         try {
-            const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1181' : 'http://userapi';
+            const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1181' : 'http://studentdocker.informatika.uni-mb.si:11181';
 
             const response = await fetch(`${baseUrl}/api/users/login`, {
                 method: 'POST',

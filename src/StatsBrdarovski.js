@@ -10,7 +10,7 @@ const StatsBrdarovski = () => {
 
     const baseUrl = process.env.NODE_ENV === 'development' 
         ? 'http://localhost:1187' 
-        : 'http://statsbrdarovski';
+        : 'http://studentdocker.informatika.uni-mb.si:11187';
 
     useEffect(() => {
         const fetchData = async () => {

@@ -12,7 +12,7 @@ const PaymentHistory = () => {
     useEffect(() => {
         const fetchPayments = async () => {
             try {
-                const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1183' : 'http://cartpaymentapi';
+                const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1183' : 'http://studentdocker.informatika.uni-mb.si:11183';
 
                 const response = await fetch(`${baseUrl}/CartPayment/payments/${userId}`, {
                     method: 'GET',

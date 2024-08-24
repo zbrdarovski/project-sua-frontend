@@ -12,7 +12,7 @@ const Delivery = () => {
     useEffect(() => {
         const fetchAllDeliveries = async () => {
             try {
-                const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1182' : 'http://deliveryapi';
+                const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1182' : 'http://studentdocker.informatika.uni-mb.si:11182';
                 
                 const allDeliveriesResponse = await fetch(`${baseUrl}/api/deliveries`);
                 if (!allDeliveriesResponse.ok) {
@@ -59,7 +59,7 @@ const Delivery = () => {
                 const geoX = Math.random();
                 const geoY = Math.random();
                 const deliveryTime = new Date().toISOString();
-                const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1183' : 'http://cartpaymentapi';
+                const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1183' : 'http://studentdocker.informatika.uni-mb.si:11183';
                 const token = localStorage.getItem('token');  // Fetch the token from local storage
     
                 // Create a new payment first
@@ -96,7 +96,7 @@ const Delivery = () => {
                 }
     
                 try {
-                    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1182' : 'http://deliveryapi';
+                    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1182' : 'http://studentdocker.informatika.uni-mb.si:11182';
                     
                     const deliveryResponse = await fetch(`${baseUrl}/api/deliveries`, {
                         method: 'POST',
@@ -115,12 +115,12 @@ const Delivery = () => {
                         }),
                     });
     
-                    const basedUrl = process.env.NODE_ENV === 'development' ? 'http://localhost' : 'http://inventoryapi';
+                    const basedUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1184' : 'http://studentdocker.informatika.uni-mb.si:11184';
     
                     if (deliveryResponse.ok) {
                         // Update inventory items and navigate accordingly
                         for (const item of cart) {
-                            const inventoryUpdateResponse = await fetch(`${basedUrl}:1184/Inventory/${item.id}`, {
+                            const inventoryUpdateResponse = await fetch(`${basedUrl}/Inventory/${item.id}`, {
                                 method: 'PUT',
                                 headers: {
                                     'Content-Type': 'application/json',

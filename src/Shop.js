@@ -16,7 +16,7 @@ const Shop = () => {
     useEffect(() => {
         const fetchAllShoes = async () => {
             try {
-                const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1184' : 'http://inventoryapi';
+                const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1184' : 'http://studentdocker.informatika.uni-mb.si:11184';
                 const token = localStorage.getItem('token'); // Retrieve the token from localStorage
 
                 const allShoesResponse = await fetch(`${baseUrl}/Inventory`, {
@@ -41,7 +41,7 @@ const Shop = () => {
                     const commentsData = {};
                     const ratingsData = {};
                     for (const shoe of filteredShoes) {
-                        const commentsUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://commentsratings';
+                        const commentsUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://studentdocker.informatika.uni-mb.si:11185';
 
                         const commentsResponse = await fetch(`${commentsUrl}/CommentsRatings/comments/${shoe.id}`, {
                             headers: {

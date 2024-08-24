@@ -16,7 +16,7 @@ const CommentsRatings = () => {
     useEffect(() => {
         const fetchAllShoes = async () => {
             try {
-                const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1184' : 'http://inventoryapi';
+                const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1184' : 'http://studentdocker.informatika.uni-mb.si:11184';
                 const allShoesResponse = await fetch(`${baseUrl}/Inventory`);
                 
                 if (!allShoesResponse.ok) {
@@ -36,7 +36,7 @@ const CommentsRatings = () => {
                 let highestRating = 0;
 
                 for (const shoe of filteredShoes) {
-                    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://commentsratings';
+                    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://studentdocker.informatika.uni-mb.si:11185';
                     
                     const commentsResponse = await fetch(`${baseUrl}/CommentsRatings/comments/${shoe.id}`, {
                         headers: {
@@ -118,7 +118,7 @@ const CommentsRatings = () => {
                 timestamp: new Date().toISOString(),
             });
 
-            const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://commentsratings';
+            const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://studentdocker.informatika.uni-mb.si:11185';
 
             const response = await fetch(`${baseUrl}/CommentsRatings/comments`, {
                 method: 'POST',
@@ -149,7 +149,7 @@ const CommentsRatings = () => {
 
     const handleCommentDelete = async (productId, commentId) => {
         try {
-            const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://commentsratings';
+            const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://studentdocker.informatika.uni-mb.si:11185';
 
             const response = await fetch(`${baseUrl}/CommentsRatings/comments/${commentId}`, {
                 method: 'DELETE',
@@ -176,7 +176,7 @@ const CommentsRatings = () => {
 
     const handleRatingSubmit = async (productId) => {
         try {
-            const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://commentsratings';
+            const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://studentdocker.informatika.uni-mb.si:11185';
 
             const response = await fetch(`${baseUrl}/CommentsRatings/ratings`, {
                 method: 'POST',
@@ -212,7 +212,7 @@ const CommentsRatings = () => {
 
     const handleRatingDelete = async (productId, ratingId) => {
         try {
-            const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://commentsratings';
+            const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1185' : 'http://studentdocker.informatika.uni-mb.si:11185';
 
             const response = await fetch(`${baseUrl}/CommentsRatings/ratings/${ratingId}`, {
                 method: 'DELETE',

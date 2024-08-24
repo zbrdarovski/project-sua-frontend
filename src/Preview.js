@@ -9,7 +9,7 @@ const DeliveryList = () => {
     const token = localStorage.getItem('token'); // Ensure you have the token
 
     useEffect(() => {
-        const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1182' : 'http://deliveryapi';
+        const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1182' : 'http://studentdocker.informatika.uni-mb.si:11182';
 
         // Fetch data from the API endpoint with proper authorization
         fetch(`${baseUrl}/api/deliveries/`, {

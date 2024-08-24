@@ -7,7 +7,7 @@ const Rabbit = () => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
-    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1186' : 'http://loggingapi';
+    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1186' : 'http://studentdocker.informatika.uni-mb.si:11186';
 
     // Function to fetch logs based on start and end dates
     useEffect(() => {

@@ -55,7 +55,7 @@ function Profile() {
             // Retrieve token from storage
             const token = localStorage.getItem('token');
 
-            const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1181' : 'http://userapi';
+            const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:1181' : 'http://studentdocker.informatika.uni-mb.si:11181';
 
             const response = await fetch(`${baseUrl}/api/users/change-password`, {
                 method: 'POST',
